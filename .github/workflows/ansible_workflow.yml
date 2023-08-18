@@ -1,0 +1,72 @@
+name: Deployment Workflow
+
+on:
+  push:
+    branches:
+      - dev
+      - test
+      - prod
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install Ansible
+        run: |
+          pip install ansible
+
+      - name: Create Ansible Inventory
+        run: |
+          echo "..." > inventory.yml
+          # Replace with your inventory content
+
+      - name: Run 'ips.py' to Get IP Addresses
+        run: python path/to/ips.py
+        # Replace with the actual path to 'ips.py'
+
+      - name: Install Ansible and Docker on Bastion
+        run: ansible-playbook -i inventory.yml bastions-install-ansible-Docker.yml
+        # Replace with actual playbook filename
+
+      - name: Create Folder on Bastion
+        run: ssh ec2-user@<BASTION_HOST_IP_OR_DOMAIN> "mkdir -p /path/on/bastion"
+        # Replace with actual command to create folder on bastion
+
+      - name: Copy Configuration Files to Bastion
+        run: scp /path/to/source/config ec2-user@<BASTION_HOST_IP_OR_DOMAIN>:/path/on/bastion/
+        # Replace with actual command to copy config files
+
+      - name: Copy Inventory Files to Bastion
+        run: scp inventory.yml ec2-user@<BASTION_HOST_IP_OR_DOMAIN>:/path/on/bastion/
+        # Replace with actual command to copy inventory files
+
+      - name: Copy Private Key to Bastion
+        run: scp -i /path/to/your/bastion/key.pem /path/to/private_key.pem ec2-user@<BASTION_HOST_IP_OR_DOMAIN>:/path/on/bastion/
+        # Replace with actual command to copy private key
+
+      - name: Copy Playbooks to Bastion
+        run: scp playbook.yml ec2-user@<BASTION_HOST_IP_OR_DOMAIN>:/path/on/bastion/
+        # Replace with actual command to copy playbooks
+
+      - name: Run 'moveFilesTobastions.yml' Playbook on Bastion
+        run: |
+          ssh -i /path/to/your/bastion/key.pem \
+            ec2-user@<BASTION_HOST_IP_OR_DOMAIN> \
+            "ansible-playbook /path/on/bastion/moveFilesTobastions.yml"
+        # Replace with actual command to run moveFilesTobastions.yml playbook on bastion
+
+      - name: Run Ansible Playbook on Bastion
+        run: |
+          ssh -i /path/to/your/bastion/key.pem \
+            ec2-user@<BASTION_HOST_IP_OR_DOMAIN> \
+            "ansible-playbook /path/on/bastion/playbook.yml"
+        # Replace with actual command to run playbook on bastion

@@ -1,0 +1,45 @@
+---
+- name: Move Files to Bastion
+  hosts: bastion
+  gather_facts: yes
+  become: yes
+
+  tasks:
+  
+    - name: Copy Configuration Files
+      copy:
+        src: /path/to/source/config
+        dest: /path/on/bastion/
+        remote_src: yes
+
+    - name: Copy Inventory File
+      copy:
+        src: inventory.yml
+        dest: /path/on/bastion/
+        remote_src: yes
+
+    - name: Copy Private Key
+      copy:
+        src: /path/to/private_key.pem
+        dest: /path/on/bastion/
+        mode: '0400'
+        remote_src: yes
+
+    - name: Copy Playbooks
+      copy:
+        src: playbook.yml
+        dest: /path/on/bastion/
+        remote_src: yes
+
+    - name: Copy 'moveFilesTobastions.yml'
+      copy:
+        src: moveFilesTobastions.yml
+        dest: /path/on/bastion/
+        remote_src: yes
+
+    # Add more copy tasks for any additional files you need
+
+    - name: Set permissions for private key
+      file:
+        path: /path/on/bastion/private_key.pem
+        mode: '0400'
